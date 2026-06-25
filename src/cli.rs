@@ -36,6 +36,9 @@ pub enum RawMode {
     },
     Check {
         names: Vec<String>,
+        /// Names of jobs to exclude from a catch-all check.
+        #[arg(long, num_args = 1.., value_name = "NAME")]
+        exclude: Vec<String>,
     },
     Lastlog {
         names: Vec<String>,
@@ -154,7 +157,22 @@ mod tests {
     fn check_with_names() {
         let args = RawArgs::parse_from(["scriptherder", "check", "jobA", "jobB"]);
         match args.mode {
-            RawMode::Check { names } => assert_eq!(names, vec!["jobA", "jobB"]),
+            RawMode::Check { names, exclude } => {
+                assert_eq!(names, vec!["jobA", "jobB"]);
+                assert!(exclude.is_empty());
+            }
+            _ => panic!("expected Check"),
+        }
+    }
+
+    #[test]
+    fn check_parses_exclude() {
+        let args = RawArgs::parse_from(["scriptherder", "check", "--exclude", "cosmos", "backup"]);
+        match args.mode {
+            RawMode::Check { names, exclude } => {
+                assert!(names.is_empty());
+                assert_eq!(exclude, vec!["cosmos", "backup"]);
+            }
             _ => panic!("expected Check"),
         }
     }

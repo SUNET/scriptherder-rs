@@ -77,7 +77,7 @@ pub fn wrap(args: &RawArgs) -> i32 {
 
 /// `mode_ls` (../src/scriptherder.py:1153): list saved job states in a table.
 pub fn ls(args: &RawArgs, names: &[String]) -> i32 {
-    let jobs = match JobsList::from_dir(&args.datadir, &args.checkdir, names, true) {
+    let jobs = match JobsList::from_dir(&args.datadir, &args.checkdir, names, true, &[]) {
         Ok(j) => j,
         Err(e) => {
             log::error!("Failed loading jobs: {} ({})", e.reason(), e.filename());
@@ -173,8 +173,8 @@ pub fn ls(args: &RawArgs, names: &[String]) -> i32 {
 }
 
 /// `mode_check` (../src/scriptherder.py:1222): Nagios-style aggregate status.
-pub fn run_check(args: &RawArgs, names: &[String]) -> i32 {
-    let jobs = match JobsList::from_dir(&args.datadir, &args.checkdir, names, true) {
+pub fn run_check(args: &RawArgs, names: &[String], exclude: &[String]) -> i32 {
+    let jobs = match JobsList::from_dir(&args.datadir, &args.checkdir, names, true, exclude) {
         Ok(j) => j,
         Err(e) => {
             println!(
@@ -194,7 +194,7 @@ pub fn run_check(args: &RawArgs, names: &[String]) -> i32 {
 
 /// `mode_lastlog` (../src/scriptherder.py:1244): print last (or last-failed) output.
 pub fn lastlog(args: &RawArgs, names: &[String], fail_status: bool) -> i32 {
-    let jobs = match JobsList::from_dir(&args.datadir, &args.checkdir, names, true) {
+    let jobs = match JobsList::from_dir(&args.datadir, &args.checkdir, names, true, &[]) {
         Ok(j) => j,
         Err(e) => {
             log::error!("Failed loading jobs: {} ({})", e.reason(), e.filename());

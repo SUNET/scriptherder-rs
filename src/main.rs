@@ -99,7 +99,7 @@ fn main() {
     let code = match &args.mode {
         RawMode::Wrap { .. } => modes::wrap(&args),
         RawMode::Ls { names } => modes::ls(&args, names),
-        RawMode::Check { names } => modes::run_check(&args, names),
+        RawMode::Check { names, exclude } => modes::run_check(&args, names, exclude),
         RawMode::Lastlog { names } => modes::lastlog(&args, names, false),
         RawMode::Lastfaillog { names } => modes::lastlog(&args, names, true),
     };

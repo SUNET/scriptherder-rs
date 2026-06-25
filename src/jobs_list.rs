@@ -22,6 +22,7 @@ impl JobsList {
         checkdir: &str,
         names: &[String],
         load_not_running: bool,
+        exclude: &[String],
     ) -> Result<JobsList, ScriptHerderError> {
         let mut jobs: Vec<Job> = Vec::new();
         if let Ok(entries) = std::fs::read_dir(datadir) {
@@ -39,6 +40,10 @@ impl JobsList {
                         if !names.is_empty() && names != ["ALL"] && !names.contains(&job.name()) {
                             continue;
                         }
+                        if exclude.contains(&job.name()) {
+                            log::debug!("Excluding {:?} (file {})", job.name(), fname);
+                            continue;
+                        }
                         jobs.push(job);
                     }
                     Err(exc) => {
@@ -53,12 +58,12 @@ impl JobsList {
         }
         let mut list = JobsList::from_jobs(jobs, load_not_running);
         if load_not_running {
-            list.load_not_running(checkdir, names);
+            list.load_not_running(checkdir, names, exclude);
         }
         Ok(list)
     }
 
-    fn load_not_running(&mut self, checkdir: &str, names: &[String]) {
+    fn load_not_running(&mut self, checkdir: &str, names: &[String], exclude: &[String]) {
         let present: std::collections::HashSet<String> =
             self.jobs.iter().map(|j| j.name()).collect();
         if let Ok(entries) = std::fs::read_dir(checkdir) {
@@ -73,6 +78,10 @@ impl JobsList {
                 }
                 let name = fname[..fname.len() - 4].to_string();
                 if !names.is_empty() && names != ["ALL"] && !names.contains(&name) {
+                    continue;
+                }
+                if exclude.contains(&name) {
+                    log::debug!("Excluding not-running {name:?} (file {fname})");
                     continue;
                 }
                 if !present.contains(&name) {
