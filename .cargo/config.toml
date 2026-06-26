@@ -1,0 +1,3 @@
+[build]
+# Static musl target by default → portable binary with no glibc version dependency.
+target = "x86_64-unknown-linux-musl"
